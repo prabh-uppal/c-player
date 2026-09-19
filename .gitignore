@@ -1,0 +1,5 @@
+build/
+asciiplayer
+asciiplayer-legacy
+*.o
+*.d
