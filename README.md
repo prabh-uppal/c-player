@@ -7,11 +7,13 @@ characters and 24-bit colour escape codes.
 make
 ./asciiplayer                 # file browser
 ./asciiplayer movie.mp4       # play directly
-./asciiplayer -g movie.mp4    # relaunch in Ghostty — much smoother (macOS)
+./asciiplayer -g movie.mp4    # relaunch in Ghostty (macOS/Linux)
 ```
 
 Needs `ffmpeg` and `ffprobe`; `ffplay` for sound.
 `brew install ffmpeg` or `apt install ffmpeg`.
+For `-g`, install Ghostty and make sure its `ghostty` command is available on
+`PATH` (Linux). On macOS, the launcher opens the Ghostty app.
 
 | Key | Action |
 |-----|--------|

@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "Please run asciiplayer inside a terminal.\n");
         return 1;
     }
-    if (!haveTool("ffmpeg") || !haveTo. l("ffprobe")) {
+    if (!haveTool("ffmpeg") || !haveTool("ffprobe")) {
         std::fprintf(stderr,
             "ffmpeg/ffprobe not found.\n"
             "  Ubuntu/Debian: sudo apt install ffmpeg\n"
@@ -37,20 +37,30 @@ int main(int argc, char** argv) {
 
     installSignalHandlers();
 
-    // -g: play in Ghostty instead. Terminal.app draws on the CPU and saturates
-    // (~150% CPU) repainting a full-screen 5 pt grid 20 times a second, so it
-    // shows fewer frames than we send; Ghostty draws on the GPU and does the
-    // same at ~30%. Opens a maximised 5 pt Ghostty window running this player.
+    // -g: relaunch in Ghostty for faster terminal rendering.
     if (argc > 1 && (std::strcmp(argv[1], "-g") == 0 || std::strcmp(argv[1], "--ghostty") == 0)) {
         std::error_code ec;
         fs::path self = fs::canonical(argv[0], ec);
         if (ec) self = fs::absolute(argv[0]);
         int pt = 5;
         if (const char* e = std::getenv("ASCIIPLAYER_ZOOM")) if (std::atoi(e) > 0) pt = std::atoi(e);
+#if defined(__APPLE__)
         std::string cmd = "open -na Ghostty --args --font-size=" + std::to_string(pt) +
             " --maximize=true --window-save-state=never --quit-after-last-window-closed=true"
             " --working-directory=" + shq(fs::current_path().string()) +
             " -e " + shq(self.string());
+#elif defined(__linux__)
+        if (!haveTool("ghostty")) {
+            std::fprintf(stderr, "Ghostty was not found. Install it and ensure 'ghostty' is on PATH.\n");
+            return 1;
+        }
+        std::string cmd = "ghostty --font-size=" + std::to_string(pt) +
+            " --maximize=true --working-directory=" + shq(fs::current_path().string()) +
+            " -e " + shq(self.string());
+#else
+        std::fprintf(stderr, "The Ghostty launcher is supported on macOS and Linux.\n");
+        return 1;
+#endif
         if (argc > 2) cmd += " " + shq(fs::absolute(argv[2]).string());
         if (std::system((cmd + " 2>/dev/null").c_str()) != 0) {
             std::fprintf(stderr, "Could not open Ghostty. Install it from https://ghostty.org\n");
