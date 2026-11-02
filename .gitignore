@@ -3,3 +3,5 @@ asciiplayer
 asciiplayer-legacy
 *.o
 *.d
+!include/asciiplayer/
+!include/asciiplayer/**
